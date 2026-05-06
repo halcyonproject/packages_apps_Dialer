@@ -100,7 +100,6 @@ import com.android.dialer.util.PermissionsUtil;
 import com.android.dialer.util.ViewUtil;
 import com.android.dialer.widget.FloatingActionButtonController;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.common.base.Ascii;
 
 import java.util.HashSet;
@@ -174,7 +173,7 @@ public class DialpadFragment extends Fragment
   private View delete;
   private ToneGenerator toneGenerator;
   private FloatingActionButtonController floatingActionButtonController;
-  private FloatingActionButton floatingActionButton;
+  private View floatingActionButton;
   private ListView dialpadChooser;
   private DialpadChooserAdapter dialpadChooserAdapter;
   /** Regular expression prohibiting manual phone call. Can be empty, which means "no rule". */
@@ -717,7 +716,7 @@ public class DialpadFragment extends Fragment
     }
     floatingActionButtonController.changeIcon(
         getContext(), iconId, res.getString(R.string.description_dial_button));
-    floatingActionButtonController.changeIconColor(getContext(), R.color.dialer_call_icon_color);
+    floatingActionButtonController.changeIconColorAttr(getContext(), com.google.android.material.R.attr.colorOnPrimaryContainer);
 
     // if the mToneGenerator creation fails, just continue without it.  It is
     // a local audio signal, and is not as important as the dtmf tone itself.

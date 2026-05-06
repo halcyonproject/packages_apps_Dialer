@@ -43,7 +43,7 @@
   </style>
 
   <!-- Activities and Applications should inherit from one of the themes above. -->
-  <style name="Dialer.ThemeBase">
+  <style name="Dialer.ThemeBase" parent="Theme.MaterialComponents.Light.Bridge">
     <item name="android:forceDarkAllowed">true</item>
     <!-- These values should be used to color all backgrounds. -->
     <item name="android:colorBackground">@color/dialer_background_color</item>
@@ -67,6 +67,11 @@
 
     <!-- Used to automatically style check/selected checkbox, switches and radio buttons -->
     <item name="colorControlActivated">?android:attr/colorAccent</item>
+
+    <!-- Material 3 Bridge -->
+    <item name="colorPrimaryContainer">@android:color/system_accent1_100</item>
+    <item name="colorOnPrimaryContainer">@android:color/system_accent1_900</item>
+    <item name="colorSurfaceContainerHigh">@android:color/system_neutral1_700</item>
 
     <!-- Dialer specific attributes. -->
     <item name="colorIcon">@color/google_grey_700</item>

@@ -31,7 +31,9 @@ import androidx.annotation.DrawableRes;
 import com.android.dialer.R;
 import com.android.dialer.common.Assert;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import android.widget.ImageView;
 
 /** Controls the movement and appearance of the FAB (Floating Action Button). */
 public class FloatingActionButtonController {
@@ -43,12 +45,12 @@ public class FloatingActionButtonController {
   private final int animationDuration;
   private final int floatingActionButtonWidth;
   private final int floatingActionButtonMarginRight;
-  private final FloatingActionButton fab;
+  private final View fab;
   private final Interpolator fabInterpolator;
   private int fabIconId = -1;
   private int screenWidth;
 
-  public FloatingActionButtonController(Activity activity, FloatingActionButton fab) {
+  public FloatingActionButtonController(Activity activity, View fab) {
     Resources resources = activity.getResources();
     fabInterpolator =
         AnimationUtils.loadInterpolator(activity, android.R.interpolator.fast_out_slow_in);
@@ -72,7 +74,7 @@ public class FloatingActionButtonController {
 
   /** @see FloatingActionButton#isShown() */
   public boolean isVisible() {
-    return fab.isShown();
+    return fab.getVisibility() == View.VISIBLE;
   }
 
   /**
@@ -91,19 +93,43 @@ public class FloatingActionButtonController {
 
   public void changeIcon(Context context, @DrawableRes int iconId, String description) {
     if (this.fabIconId != iconId) {
-      fab.setImageResource(iconId);
-      fab.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(
-              android.R.color.white, context.getTheme())));
+      if (fab instanceof FloatingActionButton) {
+        ((FloatingActionButton) fab).setImageResource(iconId);
+      } else if (fab instanceof MaterialButton) {
+        ((MaterialButton) fab).setIconResource(iconId);
+      } else if (fab instanceof ImageView) {
+        ((ImageView) fab).setImageResource(iconId);
+      }
       this.fabIconId = iconId;
     }
-    if (!fab.getContentDescription().equals(description)) {
+    if (fab.getContentDescription() == null || !fab.getContentDescription().equals(description)) {
       fab.setContentDescription(description);
     }
   }
 
+  public void changeIconColorAttr(Context context, int attr) {
+    android.util.TypedValue typedValue = new android.util.TypedValue();
+    context.getTheme().resolveAttribute(attr, typedValue, true);
+    ColorStateList tint = ColorStateList.valueOf(typedValue.data);
+    if (fab instanceof FloatingActionButton) {
+      ((FloatingActionButton) fab).setImageTintList(tint);
+    } else if (fab instanceof MaterialButton) {
+      ((MaterialButton) fab).setIconTint(tint);
+    } else if (fab instanceof ImageView) {
+      ((ImageView) fab).setImageTintList(tint);
+    }
+  }
+
   public void changeIconColor(Context context, @ColorRes int color) {
-    fab.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(color,
-            context.getTheme())));
+    ColorStateList tint = ColorStateList.valueOf(context.getResources().getColor(color,
+            context.getTheme()));
+    if (fab instanceof FloatingActionButton) {
+      ((FloatingActionButton) fab).setImageTintList(tint);
+    } else if (fab instanceof MaterialButton) {
+      ((MaterialButton) fab).setIconTint(tint);
+    } else if (fab instanceof ImageView) {
+      ((ImageView) fab).setImageTintList(tint);
+    }
   }
 
   /**
@@ -158,16 +184,45 @@ public class FloatingActionButtonController {
 
   /** @see FloatingActionButton#show() */
   public void scaleIn() {
-    fab.show();
+    if (fab instanceof FloatingActionButton) {
+      ((FloatingActionButton) fab).show();
+    } else {
+      fab.setVisibility(View.VISIBLE);
+      fab.setScaleX(0f);
+      fab.setScaleY(0f);
+      fab.setAlpha(0f);
+      fab.animate()
+          .scaleX(1f)
+          .scaleY(1f)
+          .alpha(1f)
+          .setDuration(animationDuration)
+          .setInterpolator(fabInterpolator)
+          .start();
+    }
   }
 
   /** @see FloatingActionButton#hide() */
   public void scaleOut() {
-    fab.hide();
+    if (fab instanceof FloatingActionButton) {
+      ((FloatingActionButton) fab).hide();
+    } else {
+      fab.animate()
+          .scaleX(0f)
+          .scaleY(0f)
+          .alpha(0f)
+          .setDuration(animationDuration)
+          .setInterpolator(fabInterpolator)
+          .withEndAction(() -> fab.setVisibility(View.GONE))
+          .start();
+    }
   }
 
   public void scaleOut(FloatingActionButton.OnVisibilityChangedListener listener) {
-    fab.hide(listener);
+    if (fab instanceof FloatingActionButton) {
+      ((FloatingActionButton) fab).hide(listener);
+    } else {
+      scaleOut();
+    }
   }
 
   /**
