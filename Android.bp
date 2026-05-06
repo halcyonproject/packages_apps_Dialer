@@ -100,6 +100,10 @@ android_app {
     },
     certificate: "shared",
     exclude_srcs: ["java/com/android/dialer/rootcomponentgenerator/*.java"],
+    kotlincflags: [
+        "-Xjvm-default=all",
+        "-P plugin:androidx.compose.compiler.plugins.kotlin:sourceInformation=true",
+    ],
     libs: [
         "auto_value_annotations",
         "org.apache.http.legacy.stubs.system",
@@ -211,6 +215,7 @@ android_app {
     srcs: [
         "java/**/I*.aidl",
         "java/**/*.java",
+        "java/**/*.kt",
     ],
     static_libs: [
         "android-common",
@@ -243,6 +248,15 @@ android_app {
         "libphonenumber",
         "org.lineageos.lib.phone",
         "volley",
+        "HalcyonUILib",
+        "androidx.compose.ui_ui",
+        "androidx.compose.material3_material3",
+        "androidx.compose.runtime_runtime",
+        "androidx.compose.foundation_foundation",
+        "androidx.compose.animation_animation",
+        "androidx.compose.material_material-icons-extended",
+        "androidx.compose.ui_ui-tooling-preview",
+        "androidx.activity_activity-compose",
     ],
     use_embedded_native_libs: true,
 }

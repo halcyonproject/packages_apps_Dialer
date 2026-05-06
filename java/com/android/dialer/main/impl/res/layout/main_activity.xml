@@ -50,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:layout_gravity="end|bottom"
+        android:layout_gravity="center_horizontal|bottom"
         android:forceDarkAllowed="false"
         android:src="@drawable/quantum_ic_dialpad_vd_theme_24"
         android:tint="@color/dialer_fab_icon_color"
@@ -63,9 +63,8 @@
   </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
   <!-- BottomNavBar -->
-  <include
+  <com.android.dialer.main.impl.bottomnav.BottomNavBar
       android:id="@+id/bottom_nav_bar"
-      layout="@layout/bottom_nav_bar_layout"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_alignParentBottom="true"/>
