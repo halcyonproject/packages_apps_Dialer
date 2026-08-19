@@ -19,11 +19,14 @@ package com.android.dialer.app.voicemail;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -34,6 +37,7 @@ import com.android.dialer.R;
 import com.android.dialer.app.calllog.CallLogAsyncTaskUtil;
 import com.android.dialer.app.calllog.CallLogListItemViewHolder;
 
+import com.google.android.material.shape.MaterialShapeDrawable;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Objects;
@@ -105,7 +109,7 @@ public class VoicemailPlaybackLayout extends LinearLayout
           // window.
           handler.postDelayed(deleteCallback, VOICEMAIL_DELETE_DELAY_MS + 50);
 
-          Snackbar.make(
+          Snackbar snackbar = Snackbar.make(
                   VoicemailPlaybackLayout.this,
                   R.string.snackbar_voicemail_deleted,
                   Snackbar.LENGTH_LONG)
@@ -115,8 +119,49 @@ public class VoicemailPlaybackLayout extends LinearLayout
                 handler.removeCallbacks(deleteCallback);
               })
               .setActionTextColor(
-                  context.getResources().getColor(R.color.dialer_snackbar_action_text_color))
-              .show();
+                  context.getResources().getColor(R.color.dialer_snackbar_action_text_color));
+          View anchor = getRootView().findViewById(R.id.bottom_nav_bar);
+          if (anchor != null) {
+            snackbar.setAnchorView(anchor);
+          }
+          View snackbarView = snackbar.getView();
+          float density = context.getResources().getDisplayMetrics().density;
+          Drawable bg = snackbarView.getBackground();
+          if (bg instanceof MaterialShapeDrawable) {
+            MaterialShapeDrawable materialShape = (MaterialShapeDrawable) bg;
+            materialShape.setShapeAppearanceModel(
+                materialShape.getShapeAppearanceModel().toBuilder()
+                    .setAllCornerSizes(density * 28)
+                    .build());
+          } else {
+            GradientDrawable shape = new GradientDrawable();
+            shape.setShape(GradientDrawable.RECTANGLE);
+            shape.setCornerRadius(density * 28);
+            TypedValue typedValue = new TypedValue();
+            int bgColor = 0xFF2A2B2E;
+            if (context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurfaceContainerHigh, typedValue, true)
+                || context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurface, typedValue, true)) {
+              bgColor = typedValue.data;
+            }
+            shape.setColor(bgColor);
+            snackbarView.setBackground(shape);
+          }
+          snackbarView.setClipToOutline(true);
+          snackbarView.setElevation(density * 6);
+
+          int marginHorizontal = (int) (density * 24);
+          int marginBottom = (int) (density * 16);
+          ViewGroup.LayoutParams lp = snackbarView.getLayoutParams();
+          if (lp instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) lp;
+            marginParams.setMargins(marginHorizontal, 0, marginHorizontal, marginBottom);
+            snackbarView.setLayoutParams(marginParams);
+          }
+          TextView actionView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_action);
+          if (actionView != null) {
+            actionView.setAllCaps(false);
+          }
+          snackbar.show();
         }
       };
   private boolean isPlaying = false;

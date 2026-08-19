@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.annotation.IntDef
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Star
@@ -35,6 +36,7 @@ class BottomNavBar @JvmOverloads constructor(
     }
 
     private val listeners = mutableListOf<OnBottomNavTabSelectedListener>()
+    private var onDialpadClickListener: (() -> Unit)? = null
     private val selectedTabState = mutableStateOf(TabIndex.SPEED_DIAL)
     private val showVoicemailState = mutableStateOf(false)
 
@@ -66,9 +68,24 @@ class BottomNavBar @JvmOverloads constructor(
                             icon = Icons.Default.Voicemail
                         )
                     }
+                    HalcyonFloatingBottomBarItem(
+                        selected = false,
+                        onClick = {
+                            onDialpadClickListener?.invoke()
+                        },
+                        icon = Icons.Default.Dialpad
+                    )
                 }
             }
         }
+    }
+
+    fun setOnDialpadClickListener(listener: () -> Unit) {
+        this.onDialpadClickListener = listener
+    }
+
+    fun setOnDialpadClickListener(listener: Runnable) {
+        this.onDialpadClickListener = { listener.run() }
     }
 
     fun selectTab(@TabIndex tab: Int) {

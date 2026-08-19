@@ -86,7 +86,7 @@ public class MainSearchController implements SearchBarListener {
 
   private final TransactionSafeActivity activity;
   private final BottomNavBar bottomNav;
-  private final FloatingActionButton fab;
+  @Nullable private final FloatingActionButton fab;
   private final MainToolbar toolbar;
 
   /** View located underneath the toolbar that needs to animate with it. */
@@ -111,7 +111,7 @@ public class MainSearchController implements SearchBarListener {
   public MainSearchController(
       TransactionSafeActivity activity,
       BottomNavBar bottomNav,
-      FloatingActionButton fab,
+      @Nullable FloatingActionButton fab,
       MainToolbar toolbar,
       View fragmentContainer) {
     this.activity = activity;
@@ -158,7 +158,9 @@ public class MainSearchController implements SearchBarListener {
       return;
     }
 
-    fab.hide();
+    if (fab != null) {
+      fab.hide();
+    }
     toolbar.slideUp(animate, fragmentContainer);
     toolbar.expand(animate, Optional.empty(), /* requestFocus */ false);
 
@@ -221,7 +223,9 @@ public class MainSearchController implements SearchBarListener {
       return;
     }
 
-    fab.show();
+    if (fab != null) {
+      fab.show();
+    }
     toolbar.slideDown(animate, fragmentContainer);
     toolbar.transferQueryFromDialpad(dialpadFragment.getQuery());
     activity.setTitle(R.string.main_activity_label);
@@ -330,7 +334,7 @@ public class MainSearchController implements SearchBarListener {
 
     if (isDialpadVisible()) {
       hideDialpad(animate);
-    } else if (!fab.isShown()) {
+    } else if (fab != null && !fab.isShown()) {
       fab.show();
     }
     showBottomNav();
@@ -396,7 +400,9 @@ public class MainSearchController implements SearchBarListener {
   private void openSearch(Optional<String> query) {
     LogUtil.enterBlock("MainSearchController.openSearch");
 
-    fab.hide();
+    if (fab != null) {
+      fab.hide();
+    }
     toolbar.expand(/* animate=*/ true, query, /* requestFocus */ true);
     toolbar.showKeyboard();
     hideBottomNav();
@@ -524,13 +530,13 @@ public class MainSearchController implements SearchBarListener {
   }
 
   public void onSaveInstanceState(Bundle bundle) {
-    bundle.putBoolean(KEY_IS_FAB_HIDDEN, !fab.isShown());
+    bundle.putBoolean(KEY_IS_FAB_HIDDEN, fab == null || !fab.isShown());
     bundle.putBoolean(KEY_IS_TOOLBAR_EXPANDED, toolbar.isExpanded());
     bundle.putBoolean(KEY_IS_TOOLBAR_SLIDE_UP, toolbar.isSlideUp());
   }
 
   public void onRestoreInstanceState(Bundle savedInstanceState) {
-    if (savedInstanceState.getBoolean(KEY_IS_FAB_HIDDEN, false)) {
+    if (fab != null && savedInstanceState.getBoolean(KEY_IS_FAB_HIDDEN, false)) {
       fab.hide();
     }
     boolean isSlideUp = savedInstanceState.getBoolean(KEY_IS_TOOLBAR_SLIDE_UP, false);

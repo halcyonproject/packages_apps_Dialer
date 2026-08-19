@@ -213,21 +213,22 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
     BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-    FloatingActionButton fab = activity.findViewById(R.id.fab);
-    fab.setOnClickListener(
-        v -> {
-          searchController.showDialpad(true);
-          if (callLogAdapterOnActionModeStateChangedListener.isEnabled) {
-            LogUtil.i("OldMainActivityPeer.onFabClicked", "closing multiselect");
-            callLogAdapterOnActionModeStateChangedListener.actionMode.finish();
-          }
-        });
+    FloatingActionButton fab = null;
 
     MainToolbar toolbar = activity.findViewById(R.id.toolbar);
     toolbar.maybeShowSimulator(activity);
     activity.setSupportActionBar(activity.findViewById(R.id.toolbar));
 
     bottomNav = activity.findViewById(R.id.bottom_nav_bar);
+    bottomNav.setOnDialpadClickListener(
+        () -> {
+          searchController.showDialpad(true);
+          if (callLogAdapterOnActionModeStateChangedListener != null
+              && callLogAdapterOnActionModeStateChangedListener.isEnabled) {
+            LogUtil.i("OldMainActivityPeer.onDialpadClicked", "closing multiselect");
+            callLogAdapterOnActionModeStateChangedListener.actionMode.finish();
+          }
+        });
     bottomNavTabListener =
         new MainBottomNavBarBottomNavTabListener(
             activity,
@@ -668,10 +669,12 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
     @Override
     public void enableFloatingButton(boolean enabled) {
       LogUtil.i("MainCallLogHost.enableFloatingButton", "enabled: " + enabled);
-      if (enabled) {
-        fab.show();
-      } else {
-        fab.hide();
+      if (fab != null) {
+        if (enabled) {
+          fab.show();
+        } else {
+          fab.hide();
+        }
       }
     }
   }
@@ -973,7 +976,9 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
       Fragment fragment = fragmentManager.findFragmentByTag(SPEED_DIAL_TAG);
       showFragment(fragment == null ? SpeedDialFragment.newInstance() : fragment, SPEED_DIAL_TAG);
 
-      fab.show();
+      if (fab != null) {
+        fab.show();
+      }
     }
 
     @Override
@@ -987,7 +992,9 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
       Fragment fragment = fragmentManager.findFragmentByTag(CALL_LOG_TAG);
       showFragment(fragment == null ? new CallLogFragment() : fragment, CALL_LOG_TAG);
 
-      fab.show();
+      if (fab != null) {
+        fab.show();
+      }
       showPromotionBottomSheet(activity, bottomSheet);
     }
 
@@ -1032,7 +1039,9 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
       showFragment(
           fragment == null ? ContactsFragment.newInstance(Header.ADD_CONTACT) : fragment,
           CONTACTS_TAG);
-      fab.show();
+      if (fab != null) {
+        fab.show();
+      }
     }
 
     @Override

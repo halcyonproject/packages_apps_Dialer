@@ -36,6 +36,13 @@ import com.android.dialer.storage.StorageComponent;
 import com.android.dialer.util.DialerUtils;
 import com.android.dialer.util.IntentUtil;
 
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.util.TypedValue;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.google.android.material.shape.MaterialShapeDrawable;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -80,7 +87,7 @@ public class PostCall {
         "number: %s",
         LogUtil.sanitizePhoneNumber(number));
 
-    String actionText =activity.getString(R.string.post_call_send_message);
+    String actionText = activity.getString(R.string.post_call_send_message);
 
     OnClickListener onClickListener =
         v -> activity.startActivity(PostCallActivity.newIntent(activity, number, false));
@@ -92,6 +99,8 @@ public class PostCall {
             .setActionTextColor(
                 activity.getResources().getColor(R.color.dialer_snackbar_action_text_color,
                         activity.getTheme()));
+    View anchor = activity.findViewById(R.id.bottom_nav_bar);
+    stylePillSnackbar(activity, activeSnackbar, anchor);
     activeSnackbar.show();
     StorageComponent.get(activity)
         .unencryptedSharedPrefs()
@@ -127,12 +136,60 @@ public class PostCall {
                     clear(snackbar.getContext());
                   }
                 });
+    View viewSentAnchor = activity.findViewById(R.id.bottom_nav_bar);
+    stylePillSnackbar(activity, activeSnackbar, viewSentAnchor);
     activeSnackbar.show();
     StorageComponent.get(activity)
         .unencryptedSharedPrefs()
         .edit()
         .remove(KEY_POST_CALL_MESSAGE_SENT)
         .apply();
+  }
+
+  private static void stylePillSnackbar(Activity activity, Snackbar snackbar, View anchor) {
+    if (anchor != null) {
+      snackbar.setAnchorView(anchor);
+    }
+
+    View snackbarView = snackbar.getView();
+    float density = activity.getResources().getDisplayMetrics().density;
+
+    Drawable bg = snackbarView.getBackground();
+    if (bg instanceof MaterialShapeDrawable) {
+      MaterialShapeDrawable materialShape = (MaterialShapeDrawable) bg;
+      materialShape.setShapeAppearanceModel(
+          materialShape.getShapeAppearanceModel().toBuilder()
+              .setAllCornerSizes(density * 28)
+              .build());
+    } else {
+      GradientDrawable shape = new GradientDrawable();
+      shape.setShape(GradientDrawable.RECTANGLE);
+      shape.setCornerRadius(density * 28);
+      TypedValue typedValue = new TypedValue();
+      int bgColor = 0xFF2A2B2E;
+      if (activity.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurfaceContainerHigh, typedValue, true)
+          || activity.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurface, typedValue, true)) {
+        bgColor = typedValue.data;
+      }
+      shape.setColor(bgColor);
+      snackbarView.setBackground(shape);
+    }
+    snackbarView.setClipToOutline(true);
+    snackbarView.setElevation(density * 6);
+
+    int marginHorizontal = (int) (density * 24);
+    int marginBottom = (int) (density * 16);
+    ViewGroup.LayoutParams lp = snackbarView.getLayoutParams();
+    if (lp instanceof ViewGroup.MarginLayoutParams) {
+      ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) lp;
+      marginParams.setMargins(marginHorizontal, 0, marginHorizontal, marginBottom);
+      snackbarView.setLayoutParams(marginParams);
+    }
+
+    TextView actionView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_action);
+    if (actionView != null) {
+      actionView.setAllCaps(false);
+    }
   }
 
   public static void onDisconnectPressed(Context context) {
